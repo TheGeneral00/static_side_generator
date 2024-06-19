@@ -12,7 +12,7 @@ class HTMLNode():
         if isinstance(self.props, dict):
             full_html = ""
             for key, value in self.props.items():
-                full_html += f" {key}='{value}'"
+                full_html += f' {key}="{value}"'
             return full_html
         else: raise ValueError("Props is not a dictionary")
 
