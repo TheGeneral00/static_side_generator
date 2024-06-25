@@ -1,6 +1,6 @@
 import unittest
 from textnode import TextNode
-from node_conversion import text_node_to_html_node
+from functions import text_node_to_html_node
 from leafnode import LeafNode
 
 class TestConversion(unittest.TestCase):
@@ -24,3 +24,4 @@ class TestConversion(unittest.TestCase):
 
 if __name__ =='__main__':
     unittest.main()
+

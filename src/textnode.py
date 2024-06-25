@@ -10,4 +10,10 @@ class TextNode():
         return False
 
     def __repr__(self):
-        return f"TextNode({self.text}, {self.text_type}, {self.url})"
+        contentString = ""
+        if self.text != "" and self.text !=None:
+            contentString += f'"{self.text}", '
+        contentString += f'"{self.text_type}"'
+        if self.url != "" and self.url != None:
+            contentString += f' ,"{self.url}"'
+        return f"TextNode({contentString})"

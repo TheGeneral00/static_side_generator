@@ -1,10 +1,8 @@
 from htmlnode import HTMLNode
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag=None, value=None, children=None, props=None):
-        super().__init__(tag, value, children, props)
-        if self.children != []:
-            raise TypeError("Children are not allowed")
+    def __init__(self, tag=None, value=None, props=None):
+        super().__init__(tag, value, props)
         if self.value == None:
             raise ValueError("Value is required")
         
@@ -15,3 +13,12 @@ class LeafNode(HTMLNode):
 
     def __eq__(self, other):
         return super().__eq__(other)
+
+    def __repr__(self):
+        contentString = ""
+        if self.tag != "" and self.tag !=None:
+            contentString += f'"{self.tag}", '
+        contentString += f'"{self.value}"'
+        if self.props != {} and self.props != None:
+            contentString += f' ,"{self.props}"'
+        return f"LeafNode({contentString})"

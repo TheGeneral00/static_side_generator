@@ -24,7 +24,7 @@ class TestTextNode(unittest.TestCase):
                     result = (node == node2)
                     self.assertNotEqual(node, node2)
 
-                print(f"Comparing node {i} and {j}: {'Equal' if result else 'NotEqual'}")
+               
 
 if __name__ == "__main__":
     unittest.main()
