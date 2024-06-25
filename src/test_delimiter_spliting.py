@@ -17,64 +17,84 @@ class TestDelimiterSplitting(unittest.TestCase):
             i += 1
         return True
     
-    def test(self):
-        old_nodes= [
-                TextNode("This is normal text", "text"),
-                TextNode("This is a **bold** text", "bold"),
-                TextNode("This is *italic* text", "italic"),
-                TextNode("This is an `code block` text", "text"),
-                TextNode("This is an #image", "image"),
-                LeafNode("p", "This is a LeafNode"), 
-                TextNode("This one got wrong delimiters for **italic** text", "bold")
-                ]
+    def test_delim_bold(self):
+       def test_delim_bold(self):
+        node = TextNode("This is text with a **bolded** word", "text")
+        new_nodes = split_nodes_delimiter([node], "**", "bold")
+        self.assertListEqual(
+            [
+                TextNode("This is text with a ", "text"),
+                TextNode("bolded", "bold"),
+                TextNode(" word", "text"),
+            ],
+            new_nodes,
+        )
+    def test_delim_bold_double(self):
+        node = TextNode(
+            "This is text with a **bolded** word and **another**", "text"
+        )
+        new_nodes = split_nodes_delimiter([node], "**", "bold")
+        self.assertListEqual(
+            [
+                TextNode("This is text with a ", "text"),
+                TextNode("bolded", "bold"),
+                TextNode(" word and ", "text"),
+                TextNode("another", "bold"),
+            ],
+            new_nodes,
+        )
 
-        # Run function to be tested
-        new_nodes_bold = split_nodes_delimiter(old_nodes, "**", "bold")
-        
-        new_nodes_italic = split_nodes_delimiter(old_nodes, "*", "italic")
-        new_nodes_code = split_nodes_delimiter(old_nodes, "`", "code")
-               # Define expected results
-        expected_bold = [
-            TextNode("This is normal text", "text"),
-            TextNode("This is a ", "text"),
-            TextNode("bold", "bold"),
-            TextNode(" text", "text"),
-            TextNode("This is *italic* text", "text"),
-            TextNode("This is an `code block` text", "text"),
-            TextNode("This is an #image", "text"),
-            LeafNode("p", "This is a LeafNode"),
-            TextNode("This one got wrong delimiters for ", "text"),
-            TextNode("italic", "bold"),
-            TextNode(" text", "text"),
-        ]
+    def test_delim_bold_multiword(self):
+        node = TextNode(
+            "This is text with a **bolded word** and **another**", "text"
+        )
+        new_nodes = split_nodes_delimiter([node], "**", "bold")
+        self.assertListEqual(
+            [
+                TextNode("This is text with a ", "text"),
+                TextNode("bolded word", "bold"),
+                TextNode(" and ", "text"),
+                TextNode("another", "bold"),
+            ],
+            new_nodes,
+        )
 
-        expected_italic = [
-            TextNode("This is normal text", "text"),
-            TextNode("This is a **bold** text", "text"),
-            TextNode("This is ", "text"),
-            TextNode("italic", "italic"),
-            TextNode(" text", "text"),
-            TextNode("This is an `code block` text", "text"),
-            TextNode("This is an #image", "image"),
-            LeafNode("p", "This is a LeafNode"),
-            TextNode("This one got wrong delimiters for **italic** text", "text")
-            ]
+    def test_delim_italic(self):
+        node = TextNode("This is text with an *italic* word", "text")
+        new_nodes = split_nodes_delimiter([node], "*", "italic")
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", "text"),
+                TextNode("italic", "italic"),
+                TextNode(" word", "text"),
+            ],
+            new_nodes,
+        )
 
-        expected_code = [
-            TextNode("This is normal text", "text"),
-            TextNode("This is a **bold** text", "text"),
-            TextNode("This is *italic* text", "text"),
-            TextNode("This is an ", "text"),
-            TextNode("code block", "code"),
-            TextNode(" text", "text"),
-            TextNode("This is an #image", "image"),
-            LeafNode("p", "This is a LeafNode"), 
-            TextNode("This one got wrong delimiters for **italic** text", "text")
-            ]
-        
-        self.assertTrue(self.node_list_equal(new_nodes_bold, expected_bold))
-        self.assertTrue(self.node_list_equal(new_nodes_italic, expected_italic))
-        self.assertTrue(self.node_list_equal(new_nodes_code, expected_code))
+    def test_delim_bold_and_italic(self):
+        node = TextNode("**bold** and *italic*", "text")
+        new_nodes = split_nodes_delimiter([node], "**", "bold")
+        new_nodes = split_nodes_delimiter(new_nodes, "*", "italic")
+        self.assertListEqual(
+            [
+                TextNode("bold", "bold"),
+                TextNode(" and ", "text"),
+                TextNode("italic", "italic"),
+            ],
+            new_nodes,
+        )
+
+    def test_delim_code(self):
+        node = TextNode("This is text with a `code block` word", "text")
+        new_nodes = split_nodes_delimiter([node], "`", "code")
+        self.assertListEqual(
+            [
+                TextNode("This is text with a ", "text"),
+                TextNode("code block", "code"),
+                TextNode(" word", "text"),
+            ],
+            new_nodes,
+        )
 
 if __name__ == '__main__':
     unittest.main()
