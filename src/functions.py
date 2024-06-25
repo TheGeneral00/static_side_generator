@@ -2,7 +2,7 @@ from leafnode import LeafNode
 from textnode import TextNode
 import re
 
-def text_node_to_html_node(text_node):
+def text_node_to_html_node(text_node: TextNode):
     if text_node.text_type == "text":
         return LeafNode(value=text_node.text)
     elif text_node.text_type == "bold":
@@ -18,7 +18,7 @@ def text_node_to_html_node(text_node):
     else:
         raise TypeError("The requested type is not supported")
 
-def split_nodes_delimiter(old_nodes, delimiter, text_type):
+def split_nodes_delimiter(old_nodes, delimiter: str, text_type: str):
     new_nodes = []
     delimiter_to_text_type = {"**": "bold", "*": "italic", "`": "code"}
     
@@ -53,8 +53,75 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             new_nodes.extend(splitNode)
     return new_nodes
         
-def extract_markdown_images(text):
+def extract_markdown_images(text: str):
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
     
-def extract_markdown_links(text):
+def extract_markdown_links(text: str):
     return re.findall(r"(?<!\!)\[(.*?)\]\((.*?)\)", text)
+
+def split_nodes_image(nodes):
+    """
+    Takes the text of TextNode, splits it, and creats TextNode members for found images
+    :input: list of TextNode members
+    :return: list of reformated TextNode members
+    """
+    new_nodes = []
+    if isinstance(nodes, list):    
+        for node in nodes:
+            images = extract_markdown_images(node.text)
+            if images == []:
+                new_nodes.append(node)
+            
+            for image in images:
+                splits = node.text.split(f"![{image[0]}]({image[1]})")
+                node.text = splits[1]
+                if splits[0] != "":    
+                    new_nodes.append(TextNode(splits[0], "text"))
+                new_nodes.append(TextNode(image[0], "image", image[1]))
+    else:
+        images = extract_markdown_images(nodes.text)
+        if images == []:
+            new_nodes.append(nodes)
+            
+        for image in images:
+            splits = nodes.text.split(f"![{image[0]}]({image[1]})")
+            nodes.text = splits[1]
+            if splits[0] != "":    
+                new_nodes.append(TextNode(splits[0], "text"))
+            new_nodes.append(TextNode(image[0], "image", image[1]))
+    return new_nodes
+
+
+def split_nodes_link(nodes):
+    """
+    Takes the text of TextNode, splits it, and creats TextNode members for found links
+    :input: list of TextNode members
+    :return: list of reformated TextNode members
+    """
+    new_nodes = []
+    if isinstance(nodes, list):    
+        for node in nodes:
+            links = extract_markdown_links(node.text)
+            if links == []:
+                new_nodes.append(node)
+            
+            for link in links:
+                splits = node.text.split(f"[{link[0]}]({link[1]})")
+                node.text = splits[1]
+                if splits[0] != "":    
+                    new_nodes.append(TextNode(splits[0], "text"))
+                new_nodes.append(TextNode(link[0], "link", link[1]))
+    else:
+        links = extract_markdown_links(nodes.text)
+        if links == []:
+            new_nodes.append(nodes)
+            
+        for link in links:
+            splits = nodes.text.split(f"[{link[0]}]({link[1]})")
+            nodes.text = splits[1]
+            if splits[0] != "":    
+                new_nodes.append(TextNode(splits[0], "text"))
+            new_nodes.append(TextNode(link[0], "link", link[1]))
+    return new_nodes
+
+
