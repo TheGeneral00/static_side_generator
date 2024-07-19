@@ -13,7 +13,7 @@ class TestSpliting(unittest.TestCase):
                 TextNode("another", "image","https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/dfsdkjfd.png" )
                 ]
 
-        self.assertListEqual(split_nodes_image(text), expected_list)
+        self.assertListEqual(split_nodes_image([ text ]), expected_list)
 
     def test_links(self):
         text = TextNode("This is text with a [link](https://www.example.com) and [another](https://www.example.com/another)", "text")
@@ -25,7 +25,7 @@ class TestSpliting(unittest.TestCase):
                 TextNode("another", "link", "https://www.example.com/another")
                 ]
 
-        self.assertListEqual(split_nodes_link(text), expected_list)
+        self.assertListEqual(split_nodes_link([ text ]), expected_list)
 
 if __name__ == '__main__':
     unittest.main()
