@@ -18,7 +18,6 @@ class TestTextToTextNodes(unittest.TestCase):
                 TextNode(" and a ", "text"),
                 TextNode("link", "link", "https://boot.dev")
                 ]
-        print(text_to_textnodes(text))
         self.assertListEqual(text_to_textnodes(text), expected_list)
 
 if __name__ == '__main__':
