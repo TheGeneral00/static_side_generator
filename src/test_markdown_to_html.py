@@ -1,6 +1,6 @@
 import unittest
 from functions import markdown_to_html_node
-from htmlnode import HTMLNode
+from htmlnode import ParentNode
 from textnode import TextNode
 from leafnode import LeafNode
 
@@ -29,12 +29,12 @@ print("Hello World!")```
 
 And here is more text to form another paragraph."""
 
-        expected_Node = HTMLNode(tag='div', value=None,
+        expected_Node = ParentNode(tag='div',
         children=[
-            HTMLNode(tag='h1', value=None, children=[
+            ParentNode(tag='h1', children=[
                 LeafNode(value='Heading 1')
                 ]),
-            HTMLNode(tag='p', value=None,
+            ParentNode(tag='p',
             children=[
                 LeafNode(value='This is a paragraph with some '),
                 LeafNode(tag='b', value='bold text'),
@@ -44,50 +44,46 @@ And here is more text to form another paragraph."""
                 LeafNode(tag='a', value='link', props={'href': 'https://example.com'}),
                 LeafNode(value='.'),
             ]),
-            HTMLNode(tag='blockquote', value=None,
+            ParentNode(tag='blockquote', 
             children=[
                     LeafNode(value="This is a blockquote. It spans multiple lines.")
             ]),
-            HTMLNode(tag='ul', value=None,
+            ParentNode(tag='ul',
             children=[
-                HTMLNode(tag='li', value=None, children=[
+                ParentNode(tag='li', children=[
                     LeafNode(value='Item 1 in an unordered list')
                     ]),
-                HTMLNode(tag='li', value=None, children=[
+                ParentNode(tag='li', children=[
                     LeafNode(value='Item 2 in an unordered list')
                     ]),
-                HTMLNode(tag='li', value=None,
-                    children=[
+                ParentNode(tag='li', children=[
                         LeafNode(value='Item 3 in an unordered list with '),
                         LeafNode(tag='b', value='bold text'),
                     ])
             ]),
-            HTMLNode(tag='ol', value=None,
+            ParentNode(tag='ol', 
             children=[
-                HTMLNode(tag='li', value=None, children=[
+                ParentNode(tag='li',  children=[
                     LeafNode(value='First item in an ordered list')
                     ]),
-                HTMLNode(tag='li', value=None, children=[
+                ParentNode(tag='li',  children=[
                     LeafNode(value='Second item in an ordered list')
                     ]),
-                HTMLNode(tag='li', value=None,
+                ParentNode(tag='li', 
                     children=[
                         LeafNode(value='Third item in an ordered list with '),
                         LeafNode(tag='i', value='italic text') 
                         ])
                     ]),
-            HTMLNode(tag='p', value=None, children=[
+            ParentNode(tag='p', children=[
                 LeafNode(value='Here is a code block:')
                 ]),
-            HTMLNode(tag='pre', value=None, 
-                     children=[
-                         HTMLNode(tag='code', value=None, children=[
+            ParentNode(tag='pre', children=[
+                         ParentNode(tag='code', children=[
                              LeafNode(value='def hello_world():\nprint("Hello World!")')
-                             
                              ]),
                          ]),
-            HTMLNode(tag='p', value=None, 
-                     children=[
+            ParentNode(tag='p', children=[
                          LeafNode(value='And here is more text to form another paragraph.')
                          ])
                      ])

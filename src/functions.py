@@ -1,12 +1,12 @@
 from typing import Concatenate, Text
-from htmlnode import HTMLNode
+from htmlnode import ParentNode, HTMLNode
 from leafnode import LeafNode
 from textnode import TextNode
 import re
 
 def text_node_to_html_node(text_node: TextNode):
     if text_node.text_type == "text":
-        return LeafNode(value=text_node.text)
+        return LeafNode(None, value=text_node.text)
     elif text_node.text_type == "bold":
         return LeafNode(tag="b", value=text_node.text)
     elif text_node.text_type == "italic":
@@ -14,7 +14,7 @@ def text_node_to_html_node(text_node: TextNode):
     elif text_node.text_type == "code":
         return LeafNode(tag="code", value=text_node.text)
     elif text_node.text_type == "link":
-        return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})
+        return LeafNode("a", text_node.text, {"href": text_node.url})
     elif text_node.text_type == "image":
         return LeafNode(tag="img", value="", props={"src": text_node.url, "alt": text_node.text})
     else:
@@ -98,30 +98,41 @@ def split_nodes_link(nodes) -> list[TextNode]:
         if len(links) == 0:
             new_nodes.append(node)
             continue
-        for link in links:
+        while links:
+            link = links.pop(0)
             sections = original_text.split(f"[{link[0]}]({link[1]})", 1)
             if len(sections) != 2:
                 raise ValueError("Invalid markdown, link sections not closed")
-            if sections[0] != "":
+            if sections[0]:
                 new_nodes.append(TextNode(sections[0], "text"))
             new_nodes.append(TextNode(link[0], "link", link[1]))
             original_text = sections[1]
-        if original_text != "":
+            links = extract_markdown_links(original_text)
+        if original_text:
             new_nodes.append(TextNode(original_text, "text"))
     return new_nodes
     
 
 def text_to_textnodes(text: str):
+    '''
+    Takes a TextNode and converts it into HTMLNode types using the split_nodes_delimiter function
+    :input: TextNode
+    :return: list[TextNode]
+    '''
     nodes = [TextNode(text, "text")]
     nodes = split_nodes_delimiter(nodes, "**", "bold")
     nodes = split_nodes_delimiter(nodes, "*", "italic")
     nodes = split_nodes_delimiter(nodes, "`", "code")
-
     nodes = split_nodes_image(nodes)
     nodes = split_nodes_link(nodes)
     return nodes
 
 def markdown_to_blocks(text: str):
+    '''
+    Takes a markdown text and splits it into blocks
+    :input: string
+    :output: list[string]
+    '''
     blocks = text.split("\n\n")
     new_blocks = []
     for block in blocks:
@@ -132,6 +143,11 @@ def markdown_to_blocks(text: str):
     return new_blocks
 
 def block_to_block_type(block: str):
+    '''
+    Assignes a block(type: string) a block_type based on its characteristics
+    :input: string
+    :output: block_type
+    '''
    # returns heading if block starts with '#'
     if block.startswith('#'):
         return 'heading'
@@ -151,6 +167,11 @@ def block_to_block_type(block: str):
     return 'paragraph'
 
 def check_lines_starting_pattern(block, pattern):
+    '''
+    Checks the startingpattern of the lines of a block
+    :input: block(type: string), pattern(type: string)
+    :output: True if all lines match the pattern, Flase else
+    '''
     lines = block.split('\n')
     regex = re.compile(pattern)
     for line in lines:
@@ -163,7 +184,7 @@ def markdown_to_html_node(markdown) -> HTMLNode:
     children = []
     for block in blocks:
         children.append(block_to_HTMLNode(block)) 
-    return HTMLNode('div', None, children)
+    return ParentNode('div', children)
 
 def text_to_children(text: str) -> list[LeafNode]:
     text_nodes = text_to_textnodes(text)
@@ -186,14 +207,15 @@ def block_to_HTMLNode(block):
         return ul_to_html_node(block)
     if block_type == 'quote':
         return quote_to_html_node(block)
+    raise ValueError('Invalid block type')
 
-def paragraph_to_html_node(block):
+def paragraph_to_html_node(block) -> ParentNode:
     lines = block.split('\n')
     paragraph = ' '.join(lines)
     children = text_to_children(paragraph)
-    return HTMLNode("p", None,  children)
+    return ParentNode("p", children)
 
-def heading_to_html_node(block):
+def heading_to_html_node(block) -> ParentNode:
     counter = 0
     for char in block:
         if char == '#':
@@ -204,35 +226,35 @@ def heading_to_html_node(block):
         raise ValueError(f"Invalid heading level: {counter}")
     text = block[counter+1:]
     children = text_to_children(text)
-    return HTMLNode(f'h{counter}', None, children)
+    return ParentNode(f'h{counter}', children)
 
-def code_to_html_node(block):
+def code_to_html_node(block) -> ParentNode:
     if not block.startswith('```') or not block.endswith('```'):
         raise ValueError("Invalid code block")
     text = block[3:-3]
     children = text_to_children(text)
-    code = HTMLNode('code', None, children)
-    return HTMLNode('pre', None, [ code ])
+    code = ParentNode('code', children)
+    return ParentNode('pre', [ code ])
 
-def ol_to_html_node(block):
+def ol_to_html_node(block) -> HTMLNode:
     items = block.split('\n')
     html_items = []
     for item in items:
         text = item[3:]
         children = text_to_children(text)
-        html_items.append(HTMLNode('li', None, children))
-    return HTMLNode('ol', None, html_items)
+        html_items.append(ParentNode('li', children))
+    return ParentNode('ol', html_items)
 
-def ul_to_html_node(block):
+def ul_to_html_node(block) -> HTMLNode:
     items = block.split('\n')
     html_items = []
     for item in items:
         text = item[2:]
         children = text_to_children(text)
-        html_items.append(HTMLNode('li', None, children))
-    return HTMLNode('ul', None, html_items)
+        html_items.append(ParentNode('li', children))
+    return ParentNode('ul', html_items)
 
-def quote_to_html_node(block):
+def quote_to_html_node(block) -> HTMLNode:
     lines = block.split('\n')
     new_lines = []
     for line in lines:
@@ -241,7 +263,16 @@ def quote_to_html_node(block):
         new_lines.append(line.strip('>').strip())
     content = ' '.join(new_lines)
     children = text_to_children(content)
-    return HTMLNode('blockquote', None, children)
+    return ParentNode('blockquote', children)
 
-
-        
+def extract_title(markdown):
+    HTML = markdown_to_html_node(markdown)
+    for child in HTML.children:
+        if child.tag == 'h1':
+            Leafs = child.children
+            if Leafs:
+                heading = ''
+                for Leaf in Leafs:
+                    heading += Leaf.value
+                return heading
+    raise Exception("No h1 heading")

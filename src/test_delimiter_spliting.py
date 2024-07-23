@@ -1,6 +1,6 @@
 import unittest
 from textnode import TextNode
-from functions import split_nodes_delimiter
+from functions import split_nodes_delimiter, split_nodes_link
 
 class TestSplitNodesDelimiter(unittest.TestCase):
     
@@ -48,6 +48,6 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("code", "code")
         ]
         self.assertEqual(result, expected)
-    
+
 if __name__ == '__main__':
     unittest.main() 
