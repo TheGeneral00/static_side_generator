@@ -1,8 +1,8 @@
-from copy_dic import copy_dic, generate_page
+from copy_dic import copy_dic, generate_page_recursive
 
 def main():
     copy_dic('static', 'public')
-    generate_page('content/index.md', 'template.html', 'public/index.html')
+    generate_page_recursive('content', 'template.html', 'public')
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,9 @@
 import os
 import shutil
 from functions import markdown_to_html_node, extract_title
+import mimetypes
 
-def copy_dic(source_dir, target_dir):
+def copy_dic(source_dir: str, target_dir: str) -> None:
     #setting up the required pathes
     root_dir = os.getcwd()
     #supporting dynamic path
@@ -36,7 +37,7 @@ def copy_dic(source_dir, target_dir):
             print(f"Copying directory: {item_path} to {target_path}")
             copy_dic( item_path, target_path)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     print(f'Generating page from {from_path} to {dest_path} using {template_path}')
     
     # Read markdown and template files
@@ -62,6 +63,28 @@ def generate_page(from_path, template_path, dest_path):
     # Write the full HTML to the destination path
     with open(dest_path, 'w') as output_file:
         output_file.write(template)
-    
 
+
+def generate_page_recursive(dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
+    items = os.listdir(dir_path_content)
+    for item in items:
+        
+        #set up item source and destination path
+        item_path = os.path.join(dir_path_content, item)
+        item_dest = os.path.join(dest_dir_path, item)
+        
+        #checking if item is dir or file
+        if os.path.isdir(item_path):
+            generate_page_recursive(item_path, template_path, item_dest)
+        
+        #processing markdown files, when found
+        elif is_file_of_type(item, 'md'):
+            item_dest = item_dest.strip('.md')
+            item_dest += '.html'
+            generate_page(item_path, template_path, item_dest)
+    
+# helper function for generate_page_recursive
+def is_file_of_type(file_path: str, extension: str) -> bool:
+    _, file_extension = os.path.splitext(file_path)
+    return file_extension.lower() == f'.{extension.lower()}'
 
